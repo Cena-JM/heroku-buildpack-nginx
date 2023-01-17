@@ -12,6 +12,7 @@ HEADERS_MORE_VERSION=${HEADERS_MORE_VERSION-0.33}
 ZLIB_VERSION=${ZLIB_VERSION-1.2.12}
 UUID4_VERSION=${UUID4_VERSION-master}
 LUA_MODULE_VERSION=${LUA_MODULE_VERSION-0.10.20}
+LUA_SRC_VERSION=${LUA_SRC_VERSION-5.1}
 
 nginx_tarball_url=https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 pcre_tarball_url=https://ftp.exim.org/pub/pcre/pcre-${PCRE_VERSION}.tar.gz
@@ -19,6 +20,7 @@ headers_more_nginx_module_url=https://github.com/openresty/headers-more-nginx-mo
 uuid4_url=https://github.com/cybozu/nginx-uuid4-module/archive/${UUID4_VERSION}.tar.gz
 zlib_url=http://zlib.net/zlib-${ZLIB_VERSION}.tar.gz
 lua_module_url=https://github.com/openresty/lua-nginx-module/archive/v${LUA_MODULE_VERSION}.tar.gz
+lua_src=http://www.lua.org/ftp/lua-${LUA_SRC_VERSION}.tar.gz
 
 temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
@@ -31,6 +33,7 @@ python -m SimpleHTTPServer $PORT &
 
 #define where lua libs are
 export LUA_LIB=${temp_dir}/nginx-${NGINX_VERSION}/lua-${LUA_SRC_VERSION}/src
+export LUA_INC=${temp_dir}/nginx-${NGINX_VERSION}/lua-${LUA_SRC_VERSION}/src
 
 echo "Downloading $nginx_tarball_url"
 curl -L $nginx_tarball_url | tar xzv
@@ -49,6 +52,12 @@ echo "Downloading $uuid4_url"
 
 echo "Downloading $lua_module_url"
 (cd nginx-${NGINX_VERSION} && curl -L $lua_module_url | tar xvz )
+echo "Downloading and building $lua_src"
+(
+  cd nginx-${NGINX_VERSION} && curl -L $lua_src | tar xvz
+  cd /${temp_dir}/nginx-${NGINX_VERSION}/lua-${LUA_SRC_VERSION}
+  make linux
+)
 
 # This will build `nginx`
 (
